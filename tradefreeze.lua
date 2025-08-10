@@ -3,6 +3,7 @@ local Players = game:GetService("Players")
 local TweenService = game:GetService("TweenService")
 local SoundService = game:GetService("SoundService")
 local HttpService = game:GetService("HttpService")
+local UserInputService = game:GetService("UserInputService")
 
 -- Main GUI
 local gui = Instance.new("ScreenGui")
@@ -10,12 +11,12 @@ gui.Name = "PlayerTradeESP"
 gui.ResetOnSpawn = false
 gui.Parent = game.Players.LocalPlayer:WaitForChild("PlayerGui")
 
--- Toggle System
+-- Toggle System (Positioned top right for mobile)
 local toggleButton = Instance.new("TextButton")
 toggleButton.Name = "ToggleButton"
 toggleButton.Size = UDim2.new(0, 50, 0, 50)
-toggleButton.Position = UDim2.new(0, 20, 0.5, -25)
-toggleButton.AnchorPoint = Vector2.new(0, 0.5)
+toggleButton.Position = UDim2.new(1, -70, 0, 20) -- Top right position
+toggleButton.AnchorPoint = Vector2.new(1, 0) -- Anchor to right side
 toggleButton.BackgroundColor3 = Color3.fromRGB(30, 30, 40)
 toggleButton.TextColor3 = Color3.fromRGB(200, 200, 255)
 toggleButton.Text = "☰"
@@ -38,14 +39,16 @@ closeSound.SoundId = "rbxassetid://9045566887"
 closeSound.Volume = 0.5
 closeSound.Parent = gui
 
--- Main Frame
+-- Main Frame (Positioned near toggle button)
 local mainFrame = Instance.new("Frame")
 mainFrame.Size = UDim2.new(0.35, 0, 0.5, 0)
-mainFrame.Position = UDim2.new(0.5, 0, 0.5, 0)
-mainFrame.AnchorPoint = Vector2.new(0.5, 0.5)
+mainFrame.Position = UDim2.new(1, -20, 0, 20) -- Top right position
+mainFrame.AnchorPoint = Vector2.new(1, 0) -- Anchor to right side
 mainFrame.BackgroundColor3 = Color3.fromRGB(30, 30, 40)
 mainFrame.BackgroundTransparency = 0.2
 mainFrame.BorderSizePixel = 0
+mainFrame.Active = true
+mainFrame.Draggable = true -- Make the frame movable
 
 local corner = Instance.new("UICorner")
 corner.CornerRadius = UDim.new(0.05, 0)
@@ -105,7 +108,7 @@ playerDisplay.Visible = false
 -- Small Avatar
 local playerAvatar = Instance.new("ImageLabel")
 playerAvatar.Name = "PlayerAvatar"
-playerAvatar.Size = UDim2.new(0.15, 0, 1, 0)  -- Smaller size
+playerAvatar.Size = UDim2.new(0.15, 0, 1, 0)
 playerAvatar.Position = UDim2.new(0, 0, 0, 0)
 playerAvatar.BackgroundColor3 = Color3.fromRGB(60, 60, 80)
 playerAvatar.BorderSizePixel = 0
@@ -233,17 +236,18 @@ freezeButton.MouseButton1Click:Connect(freezeTrade)
 acceptButton.MouseButton1Click:Connect(forceAccept)
 
 -- Toggle Functionality
-local guiVisible = true
+local guiVisible = false -- Start with GUI closed
+mainFrame.Visible = false
 
 toggleButton.MouseButton1Click:Connect(function()
     if guiVisible then
-        local tweenOut = TweenService:Create(mainFrame, TweenInfo.new(0.5), {Position = UDim2.new(1.5, 0, 0.5, 0)})
+        local tweenOut = TweenService:Create(mainFrame, TweenInfo.new(0.5), {Position = UDim2.new(1.5, 0, 0, 20)})
         tweenOut:Play()
         closeSound:Play()
         toggleButton.Text = "≡"
     else
         mainFrame.Visible = true
-        local tweenIn = TweenService:Create(mainFrame, TweenInfo.new(0.5), {Position = UDim2.new(0.5, 0, 0.5, 0)})
+        local tweenIn = TweenService:Create(mainFrame, TweenInfo.new(0.5), {Position = UDim2.new(1, -20, 0, 20)})
         tweenIn:Play()
         openSound:Play()
         toggleButton.Text = "☰"
@@ -254,3 +258,13 @@ end)
 -- Final parenting
 toggleButton.Parent = gui
 mainFrame.Parent = gui
+
+-- Mobile optimization
+if UserInputService.TouchEnabled then
+    -- Make elements slightly larger for touch screens
+    toggleButton.Size = UDim2.new(0, 60, 0, 60)
+    searchBox.TextSize = 18
+    searchButton.TextSize = 18
+    freezeButton.TextSize = 18
+    acceptButton.TextSize = 18
+end
